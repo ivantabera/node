@@ -1,7 +1,6 @@
-/* UBICAMOS REQUERIMIENTOS */
+/* REQUERIMIENTOS */
 const express = require('express');
-
-/* CREAMOS UNA VARIABLE PARA TENER TODAS LAS FUNCIONALIDADES DE EXPRESS */
+const mongoose = require('mongoose');
 const app = express();
 
 /* PETICION GET */
@@ -17,6 +16,15 @@ app.get('/', (req, res) =>{
     res.send(salida);
 
 })
+
+/* CONEXION A LA BASE DE DATOS */
+mongoose.connect('mongodb://localhost:27017/apiRest', {useNewUrlParser: true,useUnifiedTopology: true},
+(err, resp)=>{
+
+    if (err) throw err;
+    console.log("Conectado a la Base de Datos");
+});
+    
 
 /* SALIDA PUERTO HTTP */
 app.listen(4000, () => {
