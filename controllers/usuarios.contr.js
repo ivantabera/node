@@ -18,9 +18,22 @@ let getUsuarios = (req, res) =>{
             });        
         }
 
-        res.json({
-            status:200,
-            data
+        //contar la cantidad de registros
+        Usuario.countDocuments({}, (err, count ) => {
+
+            if (err) {
+                return res.json({
+                    status:400,
+                    mensaje: 'No hay documentos '
+                });        
+            }
+
+            res.json({
+                status:200,
+                count , 
+                data
+            })
+
         })
     });
 
