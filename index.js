@@ -22,6 +22,14 @@ app.use(bodyParser.urlencoded({ extended:false }));
 app.use(bodyParser.json());
 
 /*
+ *IMPORTAR LAS RUTAS
+ */
+app.use(require('./routes/slide.rout'));
+app.use(require('./routes/articulos.rout'));
+app.use(require('./routes/galeria.rout'));
+app.use(require('./routes/usuarios.rout'));
+
+/*
  *CONEXION A LA BASE DE DATOS 
  */
 mongoose.connect('mongodb://localhost:27017/apiRest', {useNewUrlParser: true,useUnifiedTopology: true},

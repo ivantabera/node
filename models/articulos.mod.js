@@ -7,8 +7,8 @@ let Schema = mongoose.Schema;
 
 let articulosSchema = new Schema({
     id:{
-        type:int,
-        required:[true, "id es obligatoria"]
+        type:String,
+        required:false
     },
     portada:{
         type:String,
