@@ -47,33 +47,88 @@ let setGaleria = (req, res) => {
     //Obtener el cuerpo del formulario
     let body = req.body;
 
-    //Obtener los datos del formulario para mandarlos al modelo
-    let galeria = new Galeria({
+    //preguntamos si viene un archivo
+    if(req.files){
 
-        foto: body.foto
+        //capturamos el archivo
+        let archivo = req.files.foto;
 
-    });
+        //validamos el formato de la imagen
+        if(archivo.mimetype == 'image/jpeg' || archivo.mimetype == 'image/png'){
 
-    //Guardamos en MongoDB
-    //https://mongoosejs.com/docs/api.html#model_Model-save
-    galeria.save((err, data) => {
+            //validamos el peso de la imagen
+            if(archivo.size < 2000000){
 
-        if (err) {
+                //cambiar nombre al archivo
+                let nombre = Math.floor(Math.random()*10000);
+
+                //capturar la extension del archivo
+                let extension = archivo.name.split('.').pop();
+
+                //movemos el archivo a la carpeta
+                archivo.mv(`./images/galeria/${nombre}.${extension}`, err => {
+
+                    if(err){
+                        return res.json({
+                            status:500,
+                            mensaje: 'Error al guardar la imagen',
+                            err
+                        });  
+                    }
+
+                    //Obtener los datos del formulario para mandarlos al modelo
+                    let galeria = new Galeria({
+
+                        foto: `${nombre}.${extension}`
+
+                    });
+
+                    //Guardamos en MongoDB
+                    //https://mongoosejs.com/docs/api.html#model_Model-save
+                    galeria.save((err, data) => {
+
+
+                        if (err) {
+                            return res.json({
+                                status:400,
+                                mensaje: 'Error al almacenar la galeria',
+                                err
+                            });        
+                        }
+
+                        res.json({
+
+                            status:200,
+                            mensaje:'La galeria fue guardada con exito',
+                            data
+                        })
+
+                    })
+                
+                })
+
+            } else {
+                return res.json({
+                    status:400,
+                    mensaje: 'Solo puedes subir imagenes que no superen los 2mb'
+                });  
+            }
+        
+        } else {
             return res.json({
                 status:400,
-                mensaje: 'Error al almacenar la galeria',
-                err
-            });        
+                mensaje: 'El formato del archivo no es valido, solo se acepta jpg/png'
+            });  
         }
 
-        res.json({
+    } else{
 
-            status:200,
-            mensaje:'La galeria fue guardada con exito',
-            data
-        })
+        return res.json({
+            status:500,
+            mensaje: 'La imagen no puede ir vacia'
+        });  
 
-    })
+    }
 
 }
 

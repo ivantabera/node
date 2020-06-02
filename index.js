@@ -6,6 +6,7 @@ require ('./config');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 
 /*
  *VARIABLE PARA TENER TODAS LAS FUNCIONES DE EXPRESS 
@@ -16,10 +17,15 @@ const app = express();
  *MIDDLEWARE PARA BODYPARSER 
  */
 //parse application/x-www-form-urlencoded, para llenado de formulario
-app.use(bodyParser.urlencoded({ extended:false }));
+app.use(bodyParser.urlencoded({ limit:'10mb', extended:true }));
 
 //parse application/json, respuesta a json
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit:'10mb', extended:true }));
+
+/* 
+ *MIDDLEWARE PARA fileUpload "subir archivos al servidor" 
+ */
+app.use(fileUpload());
 
 /*
  *IMPORTAR LAS RUTAS
