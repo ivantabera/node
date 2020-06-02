@@ -14,7 +14,7 @@ let getUsuarios = (req, res) =>{
         if (err) {
             return res.json({
                 status:500,
-                mensaje: 'Error en la peticion '
+                mensaje: 'Error en la peticion'
             });        
         }
 
@@ -23,8 +23,8 @@ let getUsuarios = (req, res) =>{
 
             if (err) {
                 return res.json({
-                    status:400,
-                    mensaje: 'No hay documentos '
+                    status:500,
+                    mensaje: 'Error en la peticion'
                 });        
             }
 
@@ -39,7 +39,47 @@ let getUsuarios = (req, res) =>{
 
 }
 
+/*
+ *funcion POST 
+ */
+let setUsuario = (req, res) => {
+
+    //Obtener el cuerpo del formulario
+    let body = req.body;
+
+    //Obtener los datos del formulario para mandarlos al modelo
+    let usuario = new Usuario({
+
+        usuario: body.usuario,
+        password: body.password
+
+    });
+
+    //Guardamos en MongoDB
+    //https://mongoosejs.com/docs/api.html#model_Model-save
+    usuario.save((err, data) => {
+
+        if (err) {
+            return res.json({
+                status:400,
+                mensaje: 'Error al almacenar el usuario',
+                err
+            });        
+        }
+
+        res.json({
+
+            status:200,
+            mensaje:'El usuario fue guardado con exito',
+            data
+        })
+
+    })
+
+}
+
 /* EXPORTAR FUNCIONES DEL CONTROLADOR */
 module.exports = {
-    getUsuarios
+    getUsuarios,
+    setUsuario
 }
