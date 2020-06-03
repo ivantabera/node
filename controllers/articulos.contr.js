@@ -1,6 +1,9 @@
 /* IMPORTAMOS EL MODELO */
 const Articulo = require('../models/articulos.mod');
 
+//Administrador de carpetas y archivos
+const fs = require('fs');
+
 /*
  *funcion GET 
  */
@@ -210,6 +213,13 @@ let updateArticulo = (req, res) =>{
 
                                 }
 
+                                //Borrar imagen antigua
+                                if(fs.existsSync(`./images/articulos/${rutaImagen}`)){
+
+                                    fs.unlinkSync(`./images/articulos/${rutaImagen}`)
+                                }
+
+                                //Damos valor a la nueva ruta
                                 rutaImagen = `${nombre}.${extension}`;
 
                                 resolve(rutaImagen);
