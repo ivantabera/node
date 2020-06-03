@@ -139,7 +139,7 @@ let setArticulo = (req, res) => {
 /*
  *funcion PUT 
  */
-let updateArticulo = (req, res) =>{
+let updateArticulo = (req, res) => {
 
      //Obtener el id del articulo a actualizar
     let id = req.params.id;
@@ -333,9 +333,74 @@ let updateArticulo = (req, res) =>{
 
 }
 
+/*
+ *funcion DELETE 
+ */
+let deleteArticulo = (req, res) => {
+
+    //Capturar el id que se va borrar
+    let id = req.params.id;
+
+    //Validamos que el articulo existe
+    Articulo.findById(id, (err, data) =>{
+
+        //validar que no hay error en ir a buscar en la BD
+        if(err){
+
+            return res.json({
+                status:500,
+                mensaje:"Error en el servidor",
+                err
+            })
+
+        }
+
+        //validar que el Articulo existe
+        if(!data){
+
+            return res.json({
+                status:400,
+                mensaje:"El Articulo no existe en la base de datos"
+            })
+
+        } 
+
+        //Borrar imagen antigua
+        if(fs.existsSync(`./images/articulos/${data.portada}`)){
+
+            fs.unlinkSync(`./images/articulos/${data.portada}`)
+        }
+
+        //borrar registro en mongoDB
+        //documentacion https://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
+        Articulo.findByIdAndRemove(id, (err, data) => {
+            
+            //validar que no hay error en ir a buscar en la BD
+            if(err){
+
+                return res.json({
+                    status:500,
+                    mensaje:"Error al borrar el articulo",
+                    err
+                })
+
+            }
+
+            res.json({
+                status:200, 
+                mensaje: "El articulo fue borrado correctamente"
+            })
+
+
+        })
+
+    })
+}
+
 /* EXPORTAR FUNCIONES DEL CONTROLADOR */
 module.exports = {
     getArticulo,
     setArticulo,
-    updateArticulo
+    updateArticulo,
+    deleteArticulo
 }

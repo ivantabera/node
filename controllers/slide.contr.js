@@ -330,9 +330,74 @@ let updateSlide = (req, res) =>{
 
 }
 
+/*
+ *funcion DELETE 
+ */
+let deleteSlide = (req, res) => {
+
+    //Capturar el id que se va borrar
+    let id = req.params.id;
+
+    //Validamos que el articulo existe
+    Slide.findById(id, (err, data) =>{
+
+        //validar que no hay error en ir a buscar en la BD
+        if(err){
+
+            return res.json({
+                status:500,
+                mensaje:"Error en el servidor",
+                err
+            })
+
+        }
+
+        //validar que el Articulo existe
+        if(!data){
+
+            return res.json({
+                status:400,
+                mensaje:"El slide no existe en la base de datos"
+            })
+
+        } 
+
+        //Borrar imagen antigua
+        if(fs.existsSync(`./images/slide/${data.imagen}`)){
+
+            fs.unlinkSync(`./images/slide/${data.imagen}`)
+        }
+
+        //borrar registro en mongoDB
+        //documentacion https://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
+        Slide.findByIdAndRemove(id, (err, data) => {
+            
+            //validar que no hay error en ir a buscar en la BD
+            if(err){
+
+                return res.json({
+                    status:500,
+                    mensaje:"Error al borrar la imagen",
+                    err
+                })
+
+            }
+
+            res.json({
+                status:200, 
+                mensaje: "El slide fue borrado correctamente"
+            })
+
+
+        })
+
+    })
+}
+
 /* EXPORTAR FUNCIONES DEL CONTROLADOR */
 module.exports = {
     getSlide,
     setSlide,
-    updateSlide
+    updateSlide,
+    deleteSlide
 }

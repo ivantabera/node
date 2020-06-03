@@ -328,9 +328,74 @@ let updateGaleria = (req, res) =>{
 
 }
 
+/*
+ *funcion DELETE 
+ */
+let deleteGaleria = (req, res) => {
+
+    //Capturar el id que se va borrar
+    let id = req.params.id;
+
+    //Validamos que el articulo existe
+    Galeria.findById(id, (err, data) =>{
+
+        //validar que no hay error en ir a buscar en la BD
+        if(err){
+
+            return res.json({
+                status:500,
+                mensaje:"Error en el servidor",
+                err
+            })
+
+        }
+
+        //validar que el Articulo existe
+        if(!data){
+
+            return res.json({
+                status:400,
+                mensaje:"La imagen no existe en la base de datos"
+            })
+
+        } 
+
+        //Borrar imagen antigua
+        if(fs.existsSync(`./images/galeria/${data.foto}`)){
+
+            fs.unlinkSync(`./images/galeria/${data.foto}`)
+        }
+
+        //borrar registro en mongoDB
+        //documentacion https://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
+        Galeria.findByIdAndRemove(id, (err, data) => {
+            
+            //validar que no hay error en ir a buscar en la BD
+            if(err){
+
+                return res.json({
+                    status:500,
+                    mensaje:"Error al borrar la imagen",
+                    err
+                })
+
+            }
+
+            res.json({
+                status:200, 
+                mensaje: "El articulo fue borrado correctamente"
+            })
+
+
+        })
+
+    })
+}
+
 /* EXPORTAR FUNCIONES DEL CONTROLADOR */
 module.exports = {
     getGaleria, 
     setGaleria,
-    updateGaleria
+    updateGaleria,
+    deleteGaleria
 }

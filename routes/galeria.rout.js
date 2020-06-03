@@ -8,6 +8,7 @@ const Galeria = require('../controllers/galeria.contr');
 app.get('/mostrar-galeria', Galeria.getGaleria);
 app.post('/crear-galeria', Galeria.setGaleria);
 app.put('/actualizar-galeria/:id', Galeria.updateGaleria);
+app.delete('/borrar-galeria/:id', Galeria.deleteGaleria);
 
 /* EXPORTAR LA RUTA */
 module.exports = app;
