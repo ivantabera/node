@@ -133,8 +133,86 @@ let setArticulo = (req, res) => {
 
 }
 
+/*
+ *funcion PUT 
+ */
+let updateArticulo = (req, res) =>{
+
+     //Obtener el id del articulo a actualizar
+    let id = req.params.id;
+    
+    //Obtener el cuerpo del formulario
+    let body = req.body;
+
+    /* VALIDAR QUE EL SLIDE EXISTA */
+
+    //documentacion en https://mongoosejs.com/docs/api.html#model_Model.findById
+    Articulo.findById(id, (err, data) =>{
+
+        //validar que no hay error en ir a buscar en la BD
+        if(err){
+
+            return res.json({
+                status:500,
+                mensaje:"Error en el servidor",
+                err
+            })
+
+        }
+
+        //validar que el Articulo existe
+        if(data){
+
+            let rutaImagen = data.portada;
+
+            /* VALIDAR EL CAMBIO DE IMAGEN */
+        
+        
+            /* ACTUALIZAMOS LOS REGISTROS */
+            let datosArticulo = {
+                portada: rutaImagen,
+                url: body.url,
+                titulo: body.titulo,
+                intro: body.intro,
+                contenido: body.contenido
+            }
+
+            //Actualizamos en MongoDB
+            //Documentacion https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
+            Articulo.findByIdAndUpdate(id, datosArticulo, {new:true, runValidators:true}, (err, data) =>{
+
+                if (err) {
+                    return res.json({
+                        status:400,
+                        mensaje: 'Error al actualizar el articulo'
+                    });  
+                }
+
+                res.json({
+
+                    status:200,
+                    mensaje:'El articulo fue actualizado con exito',
+                    data
+                })
+            })
+
+        } else {
+
+            return res.json({
+                status:400,
+                mensaje:"El Articulo no existe en la base de datos"
+            })
+
+        }
+
+    })
+
+
+}
+
 /* EXPORTAR FUNCIONES DEL CONTROLADOR */
 module.exports = {
     getArticulo,
-    setArticulo
+    setArticulo,
+    updateArticulo
 }

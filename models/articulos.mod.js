@@ -6,10 +6,6 @@ const mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
 let articulosSchema = new Schema({
-    id:{
-        type:String,
-        required:false
-    },
     portada:{
         type:String,
         required:[true, "portada es obligatoria"]
