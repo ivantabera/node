@@ -144,57 +144,22 @@ let updateArticulo = (req, res) =>{
     //Obtener el cuerpo del formulario
     let body = req.body;
 
-    /* VALIDAR QUE EL SLIDE EXISTA */
-
     //documentacion en https://mongoosejs.com/docs/api.html#model_Model.findById
     Articulo.findById(id, (err, data) =>{
-
-        //validar que no hay error en ir a buscar en la BD
-        if(err){
-
-            return res.json({
-                status:500,
-                mensaje:"Error en el servidor",
-                err
-            })
-
-        }
 
         //validar que el Articulo existe
         if(data){
 
-            let rutaImagen = data.portada;
+            //validar que no hay error en ir a buscar en la BD
+            if(err){
 
-            /* VALIDAR EL CAMBIO DE IMAGEN */
-        
-        
-            /* ACTUALIZAMOS LOS REGISTROS */
-            let datosArticulo = {
-                portada: rutaImagen,
-                url: body.url,
-                titulo: body.titulo,
-                intro: body.intro,
-                contenido: body.contenido
-            }
-
-            //Actualizamos en MongoDB
-            //Documentacion https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
-            Articulo.findByIdAndUpdate(id, datosArticulo, {new:true, runValidators:true}, (err, data) =>{
-
-                if (err) {
-                    return res.json({
-                        status:400,
-                        mensaje: 'Error al actualizar el articulo'
-                    });  
-                }
-
-                res.json({
-
-                    status:200,
-                    mensaje:'El articulo fue actualizado con exito',
-                    data
+                return res.json({
+                    status:500,
+                    mensaje:"Error en el servidor",
+                    err
                 })
-            })
+
+            }
 
         } else {
 
@@ -205,8 +170,156 @@ let updateArticulo = (req, res) =>{
 
         }
 
-    })
 
+        let rutaImagen = data.portada;
+
+        /* VALIDAR QUE EL HAYA CAMBIO DE IMAGEN */
+
+        let validarCambioArchivo = (req, rutaImagen)=>{
+
+            return new Promise((resolve, reject) => {
+                
+                if (req.files) {
+                    
+                    //capturamos el archivo
+                    let archivo = req.files.portada;
+
+                    //validamos el formato de la imagen
+                    if(archivo.mimetype == 'image/jpeg' || archivo.mimetype == 'image/png'){
+
+                        //validamos el peso de la imagen
+                        if(archivo.size < 2000000){
+
+                            //cambiar nombre al archivo
+                            let nombre = Math.floor(Math.random()*10000);
+
+                            //capturar la extension del archivo
+                            let extension = archivo.name.split('.').pop();
+
+                            //movemos el archivo a la carpeta
+                            archivo.mv(`./images/articulos/${nombre}.${extension}`, err => {
+
+                                if(err){
+                                    
+                                    let respuesta = {
+                                        res: res,
+                                        mensaje: "Error al guardar la imagen" 
+                                    }
+                
+                                    reject(respuesta);
+
+                                }
+
+                                rutaImagen = `${nombre}.${extension}`;
+
+                                resolve(rutaImagen);
+
+                            })
+                            
+                        } else {
+
+                            let respuesta = {
+                                res: res,
+                                mensaje: "Solo puedes subir imagenes que no superen los 2mb" 
+                            }
+        
+                            reject(respuesta);
+
+                        }
+
+                    } else {
+
+                        let respuesta = {
+                            res: res,
+                            mensaje: "El formato del archivo no es valido, solo se acepta jpg/png" 
+                        }
+
+                        reject(respuesta);
+                    }
+
+                } else{
+
+                    resolve(rutaImagen); 
+                
+                }
+            })
+
+        }
+
+        /* ACTUALIZAMOS LOS REGISTROS */
+        let cambiarRegistrosBD = (id, body, rutaImagen) =>{
+
+            return new Promise((resolve, reject) => {
+            
+                let datosArticulo = {
+                    portada: rutaImagen,
+                    url: body.url,
+                    titulo: body.titulo,
+                    intro: body.intro,
+                    contenido: body.contenido
+                }
+
+                //Actualizamos en MongoDB
+                //Documentacion https://mongoosejs.com/docs/api.html#model_Model.IdAndUpdate
+                Articulo.findByIdAndUpdate(id, datosArticulo, {new:true, runValidators:true}, (err, data) =>{
+
+                    if (err) {
+
+                        let respuesta = {
+                            res:res,
+                            error:error
+                        }
+
+                        reject(respuesta);
+
+                    }
+
+                    let respuesta = {
+                        res:res,
+                        data:data
+                    }
+
+                    resolve(respuesta);
+
+                })
+
+            })
+
+        }
+
+        /* SINCRONIZAR TAREAS  */
+        validarCambioArchivo(req, rutaImagen).then(rutaImagen => {
+
+            cambiarRegistrosBD(id, body, rutaImagen).then(respuesta => {
+
+                respuesta["res"].json({
+                    status:200,
+                    data:respuesta["data"],
+                    mensaje:"El articulo fue actualizado con exito"
+                })
+
+            }).catch( respuesta => {
+
+                respuesta["res"].json({
+                    status:400,
+                    err:respuesta["err"],
+                    mensaje:"Error al actualizar el articulo"
+                })
+
+            })
+
+        }).catch(respuesta => {
+            
+            respuesta["res"].json({
+                status:400,
+                err:respuesta["err"],
+                mensaje:respuesta["mensaje"]
+            })
+
+        })
+
+
+    })
 
 }
 
