@@ -27,6 +27,14 @@ app.use(bodyParser.json({ limit:'10mb', extended:true }));
  */
 app.use(fileUpload());
 
+/* 
+ * Mongoose deprecations
+ */
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+
 /*
  *IMPORTAR LAS RUTAS
  */
