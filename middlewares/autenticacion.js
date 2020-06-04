@@ -5,7 +5,7 @@ let verficaToken = (req, res, next) => {
 
     let token = req.get('Authorization');
 
-    jwt.verify(token, "topsecret", (err, decoded) => {
+    jwt.verify(token, process.env.SECRET, (err, decoded) => {
 
         if(err){
             return res.json({

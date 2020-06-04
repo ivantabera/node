@@ -306,8 +306,7 @@ let login = (req, res) => {
         //generamos el token de autorizacion
         let token = jwt.sign({
             data
-                    //(segundos, minutos, horas, dias)
-        }, "topsecret", {expiresIn:60*60*24*30} )
+        }, process.env.SECRET, {expiresIn: process.env.CADUCIDAD} )
 
         res.json({
             status:200,
