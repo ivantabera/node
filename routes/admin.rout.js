@@ -4,11 +4,14 @@ const app = express();
 /* IMPORTAR EL CONTROLADOR */
 const Admin = require('../controllers/admin.contr');
 
+/* IMPORTAMOS EL MIDDLEWARE */
+const { verficaToken } = require('../middlewares/autenticacion');
+
 /* CREAR RUTAS HTTP */
-app.get('/mostrar-administrador', Admin.getAdmin);
-app.post('/crear-administrador', Admin.setAdmin);
-app.put('/actualizar-administrador/:id', Admin.updateAdmin);
-app.delete('/borrar-administrador/:id', Admin.deleteAdmin);
+app.get('/mostrar-administrador', verficaToken, Admin.getAdmin);
+app.post('/crear-administrador', verficaToken, Admin.setAdmin);
+app.put('/actualizar-administrador/:id', verficaToken, Admin.updateAdmin);
+app.delete('/borrar-administrador/:id', verficaToken, Admin.deleteAdmin);
 app.post('/login', Admin.login);
 
 /* EXPORTAR LA RUTA */
