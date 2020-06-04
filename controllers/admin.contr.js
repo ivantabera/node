@@ -1,6 +1,9 @@
 /* IMPORTAMOS EL MODELO */
 const Admins = require('../models/admin.mod');
 
+/* Modulo para encriptar contraseñas */
+const bcrypt = require('bcrypt');
+
 /*
  * funcion GET 
  */
@@ -17,7 +20,7 @@ let getAdmin = (req, res) => {
         }
 
         //contar la cantidad de registros
-        Admins.countDocuments({}, (err, count ) => {
+        Admins.countDocuments({}, (err, res, count ) => {
 
             if (err) {
                 return res.json({
@@ -51,7 +54,7 @@ let setAdmin = (req, res) => {
     let admin = new Admins({
 
         usuario: body.usuario,
-        password: body.password
+        password: bcrypt.hashSync(body.password,10)
     });
 
     //Guardamos en MongoDB
