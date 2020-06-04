@@ -42,6 +42,7 @@ app.use(require('./routes/slide.rout'));
 app.use(require('./routes/articulos.rout'));
 app.use(require('./routes/galeria.rout'));
 app.use(require('./routes/usuarios.rout'));
+app.use(require('./routes/admin.rout'));
 
 /*
  *CONEXION A LA BASE DE DATOS 
