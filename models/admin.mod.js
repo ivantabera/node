@@ -17,5 +17,15 @@ let adminSchema = new Schema({
     }
 });
 
+/* Evitar devolver en Data el campo password */
+adminSchema.methods.toJSON = function() {
+    
+    let admin = this;
+    let adminObject = admin.toObject();
+    delete adminObject.password;
+
+    return adminObject;
+}
+
 //COMO PARAMETRO LE PASAMOS PRIMERO EL NOMBRE DE LA TABLA EN BD Y DESPUES EL SCHEMA
 module.exports = mongoose.model('admins', adminSchema);

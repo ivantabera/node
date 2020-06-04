@@ -20,7 +20,7 @@ let getAdmin = (req, res) => {
         }
 
         //contar la cantidad de registros
-        Admins.countDocuments({}, (err, res, count ) => {
+        Admins.countDocuments({}, (err, count ) => {
 
             if (err) {
                 return res.json({
