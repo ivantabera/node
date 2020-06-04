@@ -81,9 +81,194 @@ let setAdmin = (req, res) => {
 }
 
 /*
+ *funcion PUT 
+ */
+let updateAdmin = (req, res) => {
+
+    //Obtener el id del articulo a actualizar
+   let id = req.params.id;
+   
+   //Obtener el cuerpo del formulario
+   let body = req.body;
+
+    //validar que el Administrador existe
+   //documentacion en https://mongoosejs.com/docs/api.html#model_Model.findById
+   Admins.findById(id, (err, data) =>{
+
+
+        //validar que no hay error en ir a buscar en la BD
+        if(err){
+
+            return res.json({
+                status:500,
+                mensaje:"Error en el servidor",
+                err
+            })
+
+        }
+
+        if(!data){
+           return res.json({
+               status:400,
+               mensaje:"El Administrador no existe en la base de datos"
+           })
+        }
+
+        let pass = data.password;
+
+        /* VALIDAR QUE EL HAYA CAMBIO DE contraseña */
+
+        let validarCambioPassword = (body, pass)=>{
+
+            return new Promise((resolve, reject) => {
+
+                if(body.password == undefined){
+                    resolve(pass);
+                } else {
+                    pass = bcrypt.hashSync(body.password,10);
+                    resolve(pass);
+                }
+            })
+
+        }
+
+
+       /* ACTUALIZAMOS LOS REGISTROS */
+       let cambiarRegistrosBD = (id, body, pass) =>{
+
+           return new Promise((resolve, reject) => {
+           
+               let datosAdmin = {
+                   usuario: body.usuario,
+                   password: pass
+               }
+
+               //Actualizamos en MongoDB
+               //Documentacion https://mongoosejs.com/docs/api.html#model_Model.IdAndUpdate
+               Admins.findByIdAndUpdate(id, datosAdmin, {new:true, runValidators:true}, (err, data) =>{
+
+                   if (err) {
+
+                       let respuesta = {
+                           res:res,
+                           error:error
+                       }
+
+                       reject(respuesta);
+
+                   }
+
+                   let respuesta = {
+                       res:res,
+                       data:data
+                   }
+
+                   resolve(respuesta);
+
+               })
+
+           })
+
+       }
+
+        /* SINCRONIZAR TAREAS  */
+        validarCambioPassword(body, pass).then(pass => {
+
+            cambiarRegistrosBD(id, body, pass).then(respuesta => {
+
+                respuesta["res"].json({
+                    status:200,
+                    data:respuesta["data"],
+                    mensaje:"El administrador fue actualizado con exito"
+                })
+
+            }).catch( respuesta => {
+
+                respuesta["res"].json({
+                    status:400,
+                    err:respuesta["err"],
+                    mensaje:"Error al actualizar el administrador"
+                })
+
+            })
+
+        }).catch(respuesta => {
+            
+            respuesta["res"].json({
+                status:400,
+                err:respuesta["err"],
+                mensaje:respuesta["mensaje"]
+            })
+
+        })
+   })
+
+}
+
+/*
+ *funcion DELETE 
+ */
+let deleteAdmin = (req, res) => {
+
+    //Capturar el id que se va borrar
+    let id = req.params.id;
+
+    //Validamos que el administrador existe
+    Admins.findById(id, (err, data) =>{
+
+        //validar que no hay error en ir a buscar en la BD
+        if(err){
+
+            return res.json({
+                status:500,
+                mensaje:"Error en el servidor",
+                err
+            })
+
+        }
+
+        //validar que el administrador existe
+        if(!data){
+
+            return res.json({
+                status:400,
+                mensaje:"El Administrador no existe en la base de datos"
+            })
+
+        } 
+
+        //borrar registro en mongoDB
+        //documentacion https://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
+        Admins.findByIdAndRemove(id, (err, data) => {
+            
+            //validar que no hay error en ir a buscar en la BD
+            if(err){
+
+                return res.json({
+                    status:500,
+                    mensaje:"Error al borrar el administrador",
+                    err
+                })
+
+            }
+
+            res.json({
+                status:200, 
+                mensaje: "El administrador fue borrado correctamente"
+            })
+
+
+        })
+
+    })
+}
+
+/*
  * Exportar funciones del controlador
  */
 module.exports = {
     getAdmin,
-    setAdmin
+    setAdmin,
+    updateAdmin,
+    deleteAdmin
 }
