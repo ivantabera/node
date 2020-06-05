@@ -7,6 +7,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
+const cors = require('cors');
 
 /*
  *VARIABLE PARA TENER TODAS LAS FUNCIONES DE EXPRESS 
@@ -26,6 +27,11 @@ app.use(bodyParser.json({ limit:'10mb', extended:true }));
  *MIDDLEWARE PARA fileUpload "subir archivos al servidor" 
  */
 app.use(fileUpload());
+
+/* 
+ * Ejecutando Cors
+ */
+app.use(cors());
 
 /* 
  * Mongoose deprecations
