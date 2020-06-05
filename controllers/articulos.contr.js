@@ -3,6 +3,8 @@ const Articulo = require('../models/articulos.mod');
 
 //Administrador de carpetas y archivos
 const fs = require('fs');
+//Permite trabajar con las rutas de los archivos en nuestro servidor
+const path = require('path');
 
 /*
  *funcion GET 
@@ -397,10 +399,38 @@ let deleteArticulo = (req, res) => {
     })
 }
 
+/*
+ * funcion GET para poder tener acceso a las imagenes
+ */
+let getImagen = (req, res) => {
+    
+    //tomamos el parametro imagen que viene del formulario
+    let imagen = req.params.imagen;
+
+    //generamos la imagen de donde estan las imagenes
+    let rutaImagen = `./images/articulos/${imagen}`;
+
+    //Comprobaremos que el archivo existe
+    fs.exists(rutaImagen, exists => {
+        
+        if(!exists){
+            return res.json({
+                status:400,
+                mensaje:"La imagen no existe"
+            })
+        }
+
+        //Renderisamos el archivo en la vista
+        res.sendFile(path.resolve(rutaImagen));
+
+    })
+}
+
 /* EXPORTAR FUNCIONES DEL CONTROLADOR */
 module.exports = {
     getArticulo,
     setArticulo,
     updateArticulo,
-    deleteArticulo
+    deleteArticulo,
+    getImagen
 }
