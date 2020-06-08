@@ -1,6 +1,12 @@
 /* IMPORTAMOS EL MODELO */
 const Usuario = require('../models/usuarios.mod');
 
+/* Modulo para encriptar contraseñas */
+const bcrypt = require('bcrypt');
+
+/* Modulo para generar token de autorizacion */
+const jwt = require('jsonwebtoken');
+
 /*
  *funcion GET 
  */
@@ -51,7 +57,8 @@ let setUsuario = (req, res) => {
     let usuario = new Usuario({
 
         usuario: body.usuario,
-        password: body.password
+        password: bcrypt.hashSync(body.password,10),
+        email: body.email
 
     });
 
@@ -78,8 +85,60 @@ let setUsuario = (req, res) => {
 
 }
 
+
+/*
+ * funcion Login 
+ */
+let loginUsuario = (req, res) => {
+
+    //Obtener el cuerpo del formulario
+    let body = req.body;
+
+    //Recorremos la base de datos en busqueda del usuario
+    Usuario.findOne({usuario:body.usuario}, (err, data) => {
+
+        //validar que no exista error en el proceso
+        if (err) {
+            return res.json({
+                status:500,
+                mensaje: 'Error en la peticion '
+            });        
+        }
+
+        //validar si el usuario existe
+        if(!data){
+
+            return res.json({
+                status:400,
+                mensaje:"El usuario es incorrecto"
+            })
+
+        }
+
+        //validamos que la contraseña sea correcta
+        if(!bcrypt.compareSync(body.password, data.password)){
+            return res.json({
+                status:400,
+                mensaje:"La contraseña es incorrecta"
+            })
+        }
+
+        //generamos el token de autorizacion
+        let token = jwt.sign({
+            data
+        }, process.env.SECRET, {expiresIn: process.env.CADUCIDAD} )
+
+        res.json({
+            status:200,
+            token
+        })
+
+    })
+}
+
 /* EXPORTAR FUNCIONES DEL CONTROLADOR */
 module.exports = {
     getUsuarios,
-    setUsuario
+    setUsuario,
+    loginUsuario
 }
