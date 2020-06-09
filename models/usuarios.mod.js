@@ -8,7 +8,8 @@ let Schema = mongoose.Schema;
 let usuariosSchema = new Schema({
     usuario:{
         type:String,
-        required:[true, "usuario es obligatorio"]
+        required:[true, "usuario es obligatorio"],
+        unique:true
     },
     password:{
         type:String,

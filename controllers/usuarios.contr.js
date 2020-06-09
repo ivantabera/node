@@ -129,6 +129,7 @@ let loginUsuario = (req, res) => {
         }, process.env.SECRET, {expiresIn: process.env.CADUCIDAD} )
 
         res.json({
+            mensaje:"ok",
             status:200,
             token
         })
