@@ -69,8 +69,7 @@ let setUsuario = (req, res) => {
         if (err) {
             return res.json({
                 status:400,
-                mensaje: 'Error al almacenar el usuario',
-                err
+                mensaje: err.message
             });        
         }
 
