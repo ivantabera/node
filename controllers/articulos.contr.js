@@ -3,6 +3,8 @@ const Articulo = require('../models/articulos.mod');
 
 //Administrador de carpetas y archivos
 const fs = require('fs');
+const mkdirp = require('mkdirp');
+const rimraf = require('rimraf');
 //Permite trabajar con las rutas de los archivos en nuestro servidor
 const path = require('path');
 
@@ -50,12 +52,13 @@ let setArticulo = (req, res) => {
 
     //Obtener el cuerpo del formulario
     let body = req.body;
+    
 
     //preguntamos si viene un archivo
     if(req.files){
 
         //capturamos el archivo
-        let archivo = req.files.portada;
+        let archivo = req.files.archivo;
 
         //validamos el formato de la imagen
         if(archivo.mimetype == 'image/jpeg' || archivo.mimetype == 'image/png'){
@@ -68,14 +71,17 @@ let setArticulo = (req, res) => {
 
                 //capturar la extension del archivo
                 let extension = archivo.name.split('.').pop();
+                
+                //Creamos la carpeta nueva con el nombre de la URL
+                let crearCarpeta = mkdirp.sync(`./images/articulos/${body.url}`);
 
                 //movemos el archivo a la carpeta
-                archivo.mv(`./images/articulos/${nombre}.${extension}`, err => {
+                archivo.mv(`./images/articulos/${body.url}/${nombre}.${extension}`, err => {
                     
                     if(err){
                         return res.json({
                             status:500,
-                            mensaje: 'Error al guardar la imagen',
+                            mensaje: 'Error al guardar la el articulo',
                             err
                         });  
                     }
@@ -83,11 +89,10 @@ let setArticulo = (req, res) => {
                     //Obtener los datos del formulario para mandarlos al modelo
                     let articulo = new Articulo({
 
-                        id: body.id,
                         portada: `${nombre}.${extension}`,
-                        url: body.portada,
                         titulo: body.titulo,
                         intro: body.intro,
+                        url: body.url,
                         contenido: body.contenido
                     });
 
@@ -180,7 +185,7 @@ let updateArticulo = (req, res) => {
 
         /* VALIDAR QUE EL HAYA CAMBIO DE IMAGEN */
 
-        let validarCambioArchivo = (req, rutaImagen)=>{
+        let validarCambioArchivo = (req, body, rutaImagen)=>{
 
             return new Promise((resolve, reject) => {
                 
@@ -202,7 +207,7 @@ let updateArticulo = (req, res) => {
                             let extension = archivo.name.split('.').pop();
 
                             //movemos el archivo a la carpeta
-                            archivo.mv(`./images/articulos/${nombre}.${extension}`, err => {
+                            archivo.mv(`./images/articulos/${body.url}/${nombre}.${extension}`, err => {
 
                                 if(err){
                                     
@@ -216,9 +221,9 @@ let updateArticulo = (req, res) => {
                                 }
 
                                 //Borrar imagen antigua
-                                if(fs.existsSync(`./images/articulos/${rutaImagen}`)){
+                                if(fs.existsSync(`./images/articulos/${body.url}/${rutaImagen}`)){
 
-                                    fs.unlinkSync(`./images/articulos/${rutaImagen}`)
+                                    fs.unlinkSync(`./images/articulos/${body.url}/${rutaImagen}`)
                                 }
 
                                 //Damos valor a la nueva ruta
@@ -300,7 +305,7 @@ let updateArticulo = (req, res) => {
         }
 
         /* SINCRONIZAR TAREAS  */
-        validarCambioArchivo(req, rutaImagen).then(rutaImagen => {
+        validarCambioArchivo(req, body, rutaImagen).then(rutaImagen => {
 
             cambiarRegistrosBD(id, body, rutaImagen).then(respuesta => {
 
@@ -367,11 +372,9 @@ let deleteArticulo = (req, res) => {
 
         } 
 
-        //Borrar imagen antigua
-        if(fs.existsSync(`./images/articulos/${data.portada}`)){
-
-            fs.unlinkSync(`./images/articulos/${data.portada}`)
-        }
+        //Borraramos la carpeta del articulo
+        let rutaCarpeta = `./images/articulos/${data.url}`;
+        rimraf.sync(rutaCarpeta);
 
         //borrar registro en mongoDB
         //documentacion https://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
@@ -405,10 +408,10 @@ let deleteArticulo = (req, res) => {
 let getImagen = (req, res) => {
     
     //tomamos el parametro imagen que viene del formulario
-    let imagen = req.params.imagen;
+    let imagen = req.params.imagen.split('+');
 
     //generamos la imagen de donde estan las imagenes
-    let rutaImagen = `./images/articulos/${imagen}`;
+    let rutaImagen = `./images/articulos/${imagen[0]}/${imagen[1]}`;
 
     //Comprobaremos que el archivo existe
     fs.exists(rutaImagen, exists => {
