@@ -264,7 +264,9 @@ let updateSlide = (req, res) =>{
            return new Promise((resolve, reject) => {
            
                let datosFoto = {
-                   imagen: rutaImagen
+                   imagen: rutaImagen,
+                   titulo: body.titulo,
+                   descripcion: body.descripcion
                }
 
                //Actualizamos en MongoDB
