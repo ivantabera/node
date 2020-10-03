@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
+const { path } = require('./routes/slide.rout');
 
 /*
  *VARIABLE PARA TENER TODAS LAS FUNCIONES DE EXPRESS 
@@ -22,6 +23,9 @@ app.use(bodyParser.urlencoded({ limit:'10mb', extended:true }));
 
 //parse application/json, respuesta a json
 app.use(bodyParser.json({ limit:'10mb', extended:true }));
+
+/* Para el deploy en AWS */
+app.use(express.static(path.join(__dirname, "client/build")));
 
 /* 
  *MIDDLEWARE PARA fileUpload "subir archivos al servidor" 
